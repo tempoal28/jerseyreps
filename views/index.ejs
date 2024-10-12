@@ -31,6 +31,76 @@
         </div>
         <a href="/" class="btn btn-secondary mb-3">Torna alla Homepage</a>
         
+        <!-- Filtri -->
+        <div class="filters mb-3">
+            <form id="filters-form" method="GET" action="/analitica">
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="lega">Lega</label>
+                        <select id="lega" name="lega" class="form-control" onchange="populateTeams()">
+                            <option value="">Tutte</option>
+                            <option value="Premier League">Premier League</option>
+                            <option value="Serie A">Serie A</option>
+                            <option value="Bundesliga">Bundesliga</option>
+                            <option value="La Liga">La Liga</option>
+                            <option value="Nazionali">Nazionali</option>
+                            <option value="Edizioni Speciali">Edizioni Speciali</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="squadra">Squadra</label>
+                        <select id="squadra" name="squadra" class="form-control">
+                            <option value="">Tutte</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="taglia">Taglia</label>
+                        <select id="taglia" name="taglia" class="form-control">
+                            <option value="">Tutte</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Filtra</button>
+            </form>
+        </div>
+        
+        <script>
+            const teamsByLeague = {
+                "Premier League": ["Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", "Crystal Palace", "Everton", "Fulham", "Ipswich", "Leicester", "Liverpool", "Manchester City", "Manchester United", "Newcastle", "Nottingham Forest", "Southampton", "Tottenham", "West Ham", "Wolverhampton"],
+                "Serie A": ["Atalanta", "Bologna", "Cagliari", "Como", "Empoli", "Fiorentina", "Genoa", "Hellas Verona", "Inter", "Juventus", "Lazio", "Lecce", "Milan", "Monza", "Napoli", "Parma", "Roma", "Torino", "Udinese", "Venezia"],
+                "Bundesliga": ["Bayern Monaco", "Borussia Dortmund", "Borussia Monchengladbach", "Eintracht Francoforte", "FSV Frankfurt", "Hannover 96", "Hertha Berlin", "Hoffenheim", "Karlsruher", "Magdeburg FC", "Red Bull Leipzig", "Regensburg", "Stoccarda", "SV Sandhausen", "Union Berlin", "Werder Brema", "Wolfsburg"],
+                "La Liga": ["Algeciras", "Atletico Madrid", "Barcellona", "Betis Siviglia", "Eibar", "Espanyol", "Girona FC", "LALIGA", "Leganes", "Malaga CF", "Numancia", "Osasuna", "Real Madrid", "Real Sociedad", "Tenerife CD", "Valencia", "Villareal"],
+                "Nazionali": ["Italia", "Francia", "Germania", "Spagna", "Argentina", "Brasile", "Portogallo", "Inghilterra", "Belgio", "Olanda", "Croazia"],
+                "Edizioni Speciali": ["Special Edition Team 1", "Special Edition Team 2", "Special Edition Team 3", "Special Edition Team 4", "Special Edition Team 5"]
+            };
+        
+            function populateTeams() {
+                const legaSelect = document.getElementById("lega");
+                const squadraSelect = document.getElementById("squadra");
+                const selectedLeague = legaSelect.value;
+        
+                // Svuota le squadre precedenti
+                squadraSelect.innerHTML = '<option value="">Tutte</option>';
+        
+                // Popola le squadre in base alla lega selezionata
+                if (selectedLeague && teamsByLeague[selectedLeague]) {
+                    teamsByLeague[selectedLeague].forEach(team => {
+                        const option = document.createElement("option");
+                        option.value = team;
+                        option.textContent = team;
+                        squadraSelect.appendChild(option);
+                    });
+                }
+            }
+        </script>
+        
+
+
         <!-- Rendi la tabella responsiva -->
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -72,5 +142,47 @@
             </table>
         </div>
     </div>
+
+    <script>
+       document.getElementById('filtroLega').addEventListener('change', updateVendite);
+document.getElementById('filtroSquadra').addEventListener('change', updateVendite);
+document.getElementById('filtroTaglia').addEventListener('change', updateVendite); // Aggiunto
+
+function updateVendite() {
+    const lega = document.getElementById('filtroLega').value;
+    const squadra = document.getElementById('filtroSquadra').value;
+    const taglia = document.getElementById('filtroTaglia').value; // Aggiunto
+
+    fetch(`/analitica?lega=${lega}&squadra=${squadra}&taglia=${taglia}`) // Modificato
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            data.vendite.forEach(vendita => {
+                const row = `<tr>
+                    <td>${vendita.lega}</td>
+                    <td>${vendita.squadra}</td>
+                    <td>${vendita.giocatore}</td>
+                    <td>${vendita.taglia}</td>
+                    <td>${vendita.patch.join(', ')}</td>
+                    <td>${vendita.informazioni}</td>
+                    <td>${vendita.acquirente}</td>
+                    <td>€${vendita.prezzo.toFixed(2)}</td>
+                    <td>${new Date(vendita.data).toLocaleDateString()}</td>
+                    <td>
+                        <a href="/vendite/modifica/${vendita._id}" class="btn btn-warning btn-sm">Modifica</a>
+                        <form action="/vendite/cancella/${vendita._id}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Cancella</button>
+                        </form>
+                    </td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        })
+        .catch(error => console.error('Errore:', error));
+}
+
+    </script>
 </body>
 </html>

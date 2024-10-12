@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 // Connessione a MongoDB
 mongoose.connect(mongoURI)
   .then(() => console.log("Connesso a MongoDB")) // Messaggio di conferma
@@ -29,8 +30,46 @@ const venditaSchema = new mongoose.Schema({
     acquirente: String,
     prezzo: Number,
     data: { type: Date, default: Date.now } // Data di vendita
-  });
-  
+});
+
+// Definizione delle leghe
+const leghe = {
+    "Premier League": [
+        "Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", 
+        "Crystal Palace", "Everton", "Fulham", "Ipswich", "Leicester", "Liverpool", 
+        "Manchester City", "Manchester United", "Newcastle", "Nottingham Forest", 
+        "Southampton", "Tottenham", "West Ham", "Wolverhampton"
+    ],
+    "Serie A": [
+        "Atalanta", "Bologna", "Cagliari", "Como", "Empoli", "Fiorentina", "Genoa", 
+        "Hellas Verona", "Inter", "Juventus", "Lazio", "Lecce", "Milan", "Monza", 
+        "Napoli", "Parma", "Roma", "Torino", "Udinese", "Venezia"
+    ],
+    "Bundesliga": [
+        "Bayern Monaco", "Borussia Dortmund", "Borussia Monchengladbach", "Eintracht Francoforte", 
+        "FSV Frankfurt", "Hannover 96", "Hertha Berlin", "Hoffenheim", "Karlsruher", 
+        "Magdeburg FC", "Red Bull Leipzig", "Regensburg", "Stoccarda", "SV Sandhausen", 
+        "Union Berlin", "Werder Brema", "Wolfsburg"
+    ],
+    "La Liga": [
+        "Algeciras", "Atletico Madrid", "Barcellona", "Betis Siviglia", "Eibar", 
+        "Espanyol", "Girona FC", "LALIGA", "Leganes", "Malaga CF", "Numancia", 
+        "Osasuna", "Real Madrid", "Real Sociedad", "Tenerife CD", "Valencia", 
+        "Villareal"
+    ],
+    "Nazionali": [
+        "Italia", "Francia", "Germania", "Spagna", "Argentina", "Brasile", "Portogallo", 
+        "Inghilterra", "Belgio", "Olanda", "Croazia"
+    ],
+    "Edizioni Speciali": [
+        "Special Edition Team 1", "Special Edition Team 2", "Special Edition Team 3", 
+        "Special Edition Team 4", "Special Edition Team 5"
+    ]
+};
+
+// Modello per le vendite
+const Vendita = mongoose.model('Vendita', venditaSchema);
+
 // Rotta per aggiungere una nuova vendita
 app.post('/vendite/aggiungi', (req, res) => {
     const { lega, squadra, giocatore, taglia, patch, informazioni, acquirente, prezzo, dataVendita, oraVendita } = req.body;
@@ -71,12 +110,17 @@ app.post('/vendite/aggiungi', (req, res) => {
         });
 });
 
-
 // Rotta per visualizzare l'analisi delle vendite
 app.get('/analitica', (req, res) => {
-    Vendita.find()
+    const { lega, squadra, taglia } = req.query;
+
+    let query = {};
+    if (lega) query.lega = lega;
+    if (squadra) query.squadra = squadra;
+    if (taglia) query.taglia = taglia;
+
+    Vendita.find(query)
         .then(vendite => {
-            // Calcola il totale delle entrate
             const totaleEntrate = vendite.reduce((acc, vendita) => acc + vendita.prezzo, 0);
             res.render('index', { vendite, totaleEntrate }); // Passa le vendite e il totale alla vista
         })
@@ -86,7 +130,7 @@ app.get('/analitica', (req, res) => {
         });
 });
 
-  const Vendita = mongoose.model('Vendita', venditaSchema);
+
 
 // Rotta per cancellare una vendita
 app.post('/vendite/cancella/:id', (req, res) => {
@@ -116,8 +160,7 @@ app.get('/vendite/modifica/:id', (req, res) => {
             console.error(err);
             res.status(500).send('Errore durante il recupero della vendita.');
         });
-    }
-)
+});
 
 // Rotta per modificare una vendita
 app.post('/vendite/modifica/:id', (req, res) => {
@@ -143,16 +186,13 @@ app.post('/vendite/modifica/:id', (req, res) => {
     });
 });
 
-
-
 // Rotte
 app.use('/vendite', venditaRoutes);
 
 // Rotta per la homepage
 app.get('/', (req, res) => {
     res.render('homepage'); // Renderizza la homepage
-  });
-  
+});
 
 // Avvio del Server
 app.listen(PORT, () => {
