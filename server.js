@@ -1,7 +1,10 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+require('dotenv').config();
+const mongoose = require('mongoose');
+const mongoURI = process.env.MONGODB_URI;
 
+console.log("MONGODB_URI:", mongoURI);
 
 const venditaRoutes = require('./routes/venditaRoutes');
 
@@ -12,12 +15,9 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // Connessione a MongoDB
-mongoose.connect('mongodb://localhost:27017/maglieDB', {
-}).then(() => {
-  console.log('Connessione a MongoDB riuscita');
-}).catch((error) => {
-  console.error('Errore di connessione a MongoDB:', error);
-});
+mongoose.connect(mongoURI)
+  .then(() => console.log("Connesso a MongoDB")) // Messaggio di conferma
+  .catch((error) => console.error("Errore nella connessione a MongoDB:", error));
 
 const venditaSchema = new mongoose.Schema({
     lega: String,
