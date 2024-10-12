@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Analisi Vendite</title>
+    <style>
+        .total-entrate {
+            padding: 10px;
+            border-radius: 5px;
+            float: right; /* Posiziona il totale a destra */
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Analisi Vendite</h1>
+        <div class="total-entrate">
+            <span class="badge badge-primary">Totale Entrate: €<%= totaleEntrate.toFixed(2) %></span>
+        </div>
+        <a href="/" class="btn btn-secondary mb-3">Torna alla Homepage</a>
+        
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Lega</th>
+                    <th>Squadra</th>
+                    <th>Giocatore</th>
+                    <th>Taglia</th>
+                    <th>Patch</th>
+                    <th>Informazioni</th>
+                    <th>Acquirente</th>
+                    <th>Prezzo</th>
+                    <th>Data</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% vendite.forEach(vendita => { %>
+                    <tr>
+                        <td><%= vendita.lega %></td>
+                        <td><%= vendita.squadra %></td>
+                        <td><%= vendita.giocatore %></td>
+                        <td><%= vendita.taglia %></td>
+                        <td><%= vendita.patch.join(', ') %></td>
+                        <td><%= vendita.informazioni %></td>
+                        <td><%= vendita.acquirente %></td>
+                        <td>€<%= vendita.prezzo.toFixed(2) %></td>
+                        <td><%= vendita.data.toLocaleDateString() %></td>
+                        <td>
+                            <a href="/vendite/modifica/<%= vendita._id %>" class="btn btn-warning">Modifica</a>
+                            <form action="/vendite/cancella/<%= vendita._id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Cancella</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

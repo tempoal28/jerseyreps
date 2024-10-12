@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aggiungi Vendita</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script>
+    // Oggetto che mappa le leghe alle rispettive squadre
+    const squadrePerLega = {
+      "Premier League": [
+        "Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", 
+        "Crystal Palace", "Everton", "Fulham", "Ipswich", "Leicester", "Liverpool", 
+        "Manchester City", "Manchester United", "Newcastle", "Nottingham Forest", 
+        "Southampton", "Tottenham", "West Ham", "Wolverhampton"
+      ],
+      "Serie A": [
+        "Atalanta", "Bologna", "Cagliari", "Como", "Empoli", "Fiorentina", "Genoa", 
+        "Hellas Verona", "Inter", "Juventus", "Lazio", "Lecce", "Milan", "Monza", 
+        "Napoli", "Parma", "Roma", "Torino", "Udinese", "Venezia"
+      ],
+      "Bundesliga": [
+        "Bayern Monaco", "Borussia Dortmund", "Borussia Monchengladbach", "Eintracht Francoforte", 
+        "FSV Frankfurt", "Hannover 96", "Hertha Berlin", "Hoffenheim", "Karlsruher", 
+        "Magdeburg FC", "Red Bull Leipzig", "Regensburg", "Stoccarda", "SV Sandhausen", 
+        "Union Berlin", "Werder Brema", "Wolfsburg"
+      ],
+      "La Liga": [
+        "Algeciras", "Atletico Madrid", "Barcellona", "Betis Siviglia", "Eibar", 
+        "Espanyol", "Girona FC", "LALIGA", "Legenes", "Malaga CF", "Numancia", 
+        "Osasuna", "Real Madrid", "Real Sociedad", "Tenerife CD", "Valencia", 
+        "Villareal"
+      ],
+      "Nazionali": [
+        "Italia", "Francia", "Germania", "Spagna", "Argentina", "Brasile", "Portogallo", 
+        "Inghilterra", "Belgio", "Olanda", "Croazia"
+      ],
+      "Edizioni Speciali": [
+        "Special Edition Team 1", "Special Edition Team 2", "Special Edition Team 3", 
+        "Special Edition Team 4", "Special Edition Team 5"
+      ]
+    };
+
+    function aggiornaSquadre() {
+      const legaSelect = document.getElementById('lega');
+      const squadraSelect = document.getElementById('squadra');
+      const legaSelezionata = legaSelect.value;
+
+      // Svuota le opzioni della squadra
+      squadraSelect.innerHTML = "";
+
+      if (legaSelezionata in squadrePerLega) {
+        // Aggiungi le squadre della lega selezionata
+        squadrePerLega[legaSelezionata].forEach(squadra => {
+          const option = document.createElement('option');
+          option.value = squadra;
+          option.textContent = squadra;
+          squadraSelect.appendChild(option);
+        });
+      }
+    }
+
+    function aggiungiPatch() {
+      const patchContainer = document.getElementById('patchContainer');
+      const newPatchDiv = document.createElement('div');
+      newPatchDiv.className = 'patchDiv mb-2';
+
+      const label = document.createElement('label');
+      label.textContent = "Patch:";
+      newPatchDiv.appendChild(label);
+
+      const select = document.createElement('select');
+      select.name = "patch[]"; // Aggiungi array per raccogliere più valori
+      const options = [
+        "Seleziona una patch", "Champions League", "Scudetto", "Coppa Italia", "Sponsor", "Altro"
+      ];
+      options.forEach(optionText => {
+        const option = document.createElement('option');
+        option.value = optionText;
+        option.textContent = optionText;
+        select.appendChild(option);
+      });
+      newPatchDiv.appendChild(select);
+
+      // Aggiungi un pulsante per rimuovere la patch
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'btn btn-danger btn-sm ml-2';
+      removeButton.textContent = 'Rimuovi Patch';
+      removeButton.onclick = () => patchContainer.removeChild(newPatchDiv);
+      newPatchDiv.appendChild(removeButton);
+
+      patchContainer.appendChild(newPatchDiv);
+    }
+  </script>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center">Aggiungi una Nuova Vendita</h1>
+    <form action="/vendite/aggiungi" method="POST" enctype="application/x-www-form-urlencoded" class="mt-4">
+      <div class="form-group">
+        <label for="lega">Lega:</label>
+        <select id="lega" name="lega" class="form-control" onchange="aggiornaSquadre()" required>
+          <option value="">Seleziona una lega</option>
+          <option value="Premier League">Premier League</option>
+          <option value="Serie A">Serie A</option>
+          <option value="Bundesliga">Bundesliga</option>
+          <option value="La Liga">La Liga</option>
+          <option value="Nazionali">Nazionali</option>
+          <option value="Edizioni Speciali">Edizioni Speciali</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="squadra">Squadra:</label>
+        <select id="squadra" name="squadra" class="form-control" required>
+          <option value="">Seleziona prima una lega</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="giocatore">Giocatore:</label>
+        <input type="text" id="giocatore" name="giocatore" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="taglia">Taglia:</label>
+        <select id="taglia" name="taglia" class="form-control" required>
+          <option value="">Seleziona una taglia</option>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="patch">Patch:</label>
+        <div id="patchContainer">
+          <select name="patch[]" class="form-control mb-2">
+            <option value="">Seleziona una patch</option>
+            <option value="Champions League">Champions League</option>
+            <option value="Scudetto">Scudetto</option>
+            <option value="Coppa Italia">Coppa Italia</option>
+            <option value="Sponsor">Sponsor</option>
+            <option value="Altro">Altro</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="aggiungiPatch()">Aggiungi Patch</button>
+      </div>
+
+      <div class="form-group">
+        <label for="informazioni">Ulteriori informazioni:</label>
+        <textarea id="informazioni" name="informazioni" rows="4" cols="50" class="form-control" placeholder="Inserisci ulteriori dettagli..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="acquirente">Nome dell'acquirente:</label>
+        <input type="text" id="acquirente" name="acquirente" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="dataVendita">Data di Vendita</label>
+        <input type="date" name="dataVendita" class="form-control mb-2" value="<%= new Date().toISOString().split('T')[0] %>">
+    </div>
+  
+    <div class="form-group">
+        <label for="oraVendita">Ora di Vendita</label>
+        <input type="time" name="oraVendita" class="form-control mb-2">
+    </div>
+
+      <div class="form-group">
+        <label for="prezzo">Prezzo di vendita (€):</label>
+        <input type="number" id="prezzo" name="prezzo" class="form-control" required step="0.01" min="0">
+      </div>
+
+      <button type="submit" class="btn btn-success btn-block">Carica Vendita</button>
+    </form>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
